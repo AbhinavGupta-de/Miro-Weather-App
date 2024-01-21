@@ -25,7 +25,7 @@ const App = () => {
       try {
         const weatherData = await fetchWeather(city);
         console.log("weather", weatherData);
-        await createWeatherCard(weatherData);
+        await createWeatherCard(weatherData, city);
       } catch (e) {
         console.error(e);
       }

@@ -114,12 +114,12 @@ const todayContent = (text) => {
   }
 }
 
-export const createWeatherCard = async (weather) => {
+export const createWeatherCard = async (weatherData, city) => {
   console.log('data', weatherData);
   console.log('icon', weatherData.weather[0].icon);
 
   const shape = await miro.board.createShape();
-  const cityText = await miro.board.createText(cityTextContent('London'));
+  const cityText = await miro.board.createText(cityTextContent(city));
   const degreeText = await miro.board.createText(degreeContent(Math.floor(weatherData.main.temp - 273.15), true));
   const statusText = await miro.board.createText(statusContent(weatherData.weather[0].description));
   const windText =  await miro.board.createText(windContent(weatherData.wind.speed));

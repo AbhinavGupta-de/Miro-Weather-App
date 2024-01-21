@@ -1,5 +1,8 @@
 import { dayOfWeek } from "./CurrentDay"
 
+// Delete this after everything is working
+import { weatherData } from "./ApiResultExample"
+
 const locationProperties = (x, y, width) => {
   return {
     x: x,
@@ -104,22 +107,22 @@ const windContent = (text) => {
 
 const todayContent = (text) => {
   return {
-    content: `captialize(text)`,
+    content: captialize(text),
     style: {
       ...styleProperties()
     }, ...locationProperties(0, 0, 300)
   }
 }
 
-export const createWeatherCard = async (weatherData) => {
+export const createWeatherCard = async (text) => {
   const shape = await miro.board.createShape();
-  const cityText = await miro.board.createText(cityTextContent(weatherData));
-  const logo = await miro.board.createImage(logoContent('04n'));
-  const degreeText = await miro.board.createText(degreeContent('15', true));
-  const statusText = await miro.board.createText(statusContent('mostly cloudy'));
-  const windText =  await miro.board.createText(windContent('2.5'));
-  const humidityText = await miro.board.createText(humidityContent('62'));
-  const todayText = await miro.board.createText(todayContent('Saturday'));
+  const cityText = await miro.board.createText(cityTextContent('London'));
+  const logo = await miro.board.createImage(logoContent(weatherData.weather.icon));
+  const degreeText = await miro.board.createText(degreeContent(Math.floor(weatherData.main.temp - 273.15), true));
+  const statusText = await miro.board.createText(statusContent(weatherData.weather.description));
+  const windText =  await miro.board.createText(windContent(weatherData.wind.speed));
+  const humidityText = await miro.board.createText(humidityContent(weatherData.main.humidity));
+  const todayText = await miro.board.createText(todayContent(dayOfWeek));
 
   const items = [shape, cityText, degreeText, logo, statusText, windText, humidityText];
 

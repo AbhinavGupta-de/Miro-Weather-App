@@ -1,92 +1,131 @@
-const card = async () =>
-  await miro.board.createShape({
-    shape: "round_rectangle",
+import { dayOfWeek } from "./CurrentDay"
+
+const locationProperties = (x, y, width) => {
+  return {
+    x: x,
+    y: y,
+    width: width,
+    rotation: 0.0,
+  }
+}
+
+const styleProperties = () => {
+  return {
+    color: "#1a1a1a", // Default value: '#1a1a1a' (black)
+    fillColor: "transparent", // Default value: transparent (no fill)
+    fillOpacity: 1, // Default value: 1 (solid color)
+    fontFamily: "arial", // Default font type for the text
+    fontSize: 14, // Default font size for the text
+    textAlign: "left", // Default horizontal alignment for the text
+  }
+}
+
+function capitalize(str) {
+  // Check if the string is not empty
+  if (str.length === 0) {
+    return str;
+  }
+
+  // Capitalize the first letter and concatenate with the rest of the string
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+const cityTextContent = (text) => {
+  return {
+    content: `City: ${text}`,
     style: {
-      fillColor: "#FFFFFF",
+      color: "#1a1a1a",
     },
     x: 0,
     y: 0,
-    width: 280,
-    height: 280,
-  });
+    width: 300
+  }
+}
 
-const cityText = async (text) => {
-  await miro.board.createText({
-    content: `City: ${text}`,
+const logoContent = (text) => {
+  return {
+    title: 'Logo',
+    url: `https://openweathermap.org/img/wn/${text}@2x.png`,
+    x: 0,
+    y: 0,
+    width: 200,
+    rotation: 0.0,
+  }
+}
+
+const degreeContent = (text, isCelsius) => {
+  let degree = text;
+  let unit;
+
+  if (isCelsius) unit = '°C';
+  else {
+    degree = (9/5 * degree) + 32;
+    unit = '°F';
+  };
+
+  return {
+    content: `${text}${unit}`,
     style: {
-      color: "#1a1a1a", // Default value: '#1a1a1a' (black)
-      fillColor: "transparent", // Default value: transparent (no fill)
-      fillOpacity: 1, // Default value: 1 (solid color)
-      fontFamily: "arial", // Default font type for the text
-      fontSize: 14, // Default font size for the text
-      textAlign: "left", // Default horizontal alignment for the text
+
     },
     x: 0, // Default value: horizontal center of the board
     y: 0, // Default value: vertical center of the board
     width: 300,
     rotation: 0.0,
-  });
-};
+  }
+}
 
-const todayText = async (text) => {
-  await miro.board.createText({
-    content: `${text}`,
+const statusContent = (text) => {
+  return {
+    content: capitalize(text),
     style: {
-      color: "#1a1a1a", // Default value: '#1a1a1a' (black)
-      fillColor: "transparent", // Default value: transparent (no fill)
-      fillOpacity: 1, // Default value: 1 (solid color)
-      fontFamily: "arial", // Default font type for the text
-      fontSize: 14, // Default font size for the text
-      textAlign: "left", // Default horizontal alignment for the text
-    },
-    x: 0, // Default value: horizontal center of the board
-    y: 0, // Default value: vertical center of the board
-    width: 300,
-    rotation: 0.0,
-  });
-};
+      ...styleProperties()
+    }, ...locationProperties(0, 0, 300)
+  }
+}
 
-const degreeText = async (text, isCelsius) => {
-  await miro.board.createText({
-    content: `${text}°${isCelsius ? "C" : "F"}`,
+const humidityContent = (text) => {
+  return {
+    content: `Humidity: ${text}%`,
     style: {
-      color: "#1a1a1a", // Default value: '#1a1a1a' (black)
-      fillColor: "transparent", // Default value: transparent (no fill)
-      fillOpacity: 1, // Default value: 1 (solid color)
-      fontFamily: "arial", // Default font type for the text
-      fontSize: 14, // Default font size for the text
-      textAlign: "left", // Default horizontal alignment for the text
-    },
-    x: 0, // Default value: horizontal center of the board
-    y: 0, // Default value: vertical center of the board
-    width: 300,
-    rotation: 0.0,
-  });
-};
+      ...styleProperties()
+    }, ...locationProperties(0, 0, 300)
+  }
+}
 
-const statusText = async (text) => {
-  await miro.board.createText({
-    content: `${text}`,
+const windContent = (text) => {
+  return {
+    content: `Wind: ${text}m/s`,
     style: {
-      color: "#1a1a1a", // Default value: '#1a1a1a' (black)
-      fillColor: "transparent", // Default value: transparent (no fill)
-      fillOpacity: 1, // Default value: 1 (solid color)
-      fontFamily: "arial", // Default font type for the text
-      fontSize: 14, // Default font size for the text
-      textAlign: "left", // Default horizontal alignment for the text
-    },
-    x: 0, // Default value: horizontal center of the board
-    y: 0, // Default value: vertical center of the board
-    width: 300,
-    rotation: 0.0,
-  });
-};
+      ...styleProperties()
+    }, ...locationProperties(0, 0, 300)
+  }
+}
 
-const items = [card, cityText];
-const group = await miro.board.group({ items });
-const frame = await miro.board.createFrame();
+const todayContent = (text) => {
+  return {
+    content: `captialize(text)`,
+    style: {
+      ...styleProperties()
+    }, ...locationProperties(0, 0, 300)
+  }
+}
 
 export const createWeatherCard = async (weatherData) => {
+  const shape = await miro.board.createShape();
+  const cityText = await miro.board.createText(cityTextContent(weatherData));
+  const logo = await miro.board.createImage(logoContent('04n'));
+  const degreeText = await miro.board.createText(degreeContent('15', true));
+  const statusText = await miro.board.createText(statusContent('mostly cloudy'));
+  const windText =  await miro.board.createText(windContent('2.5'));
+  const humidityText = await miro.board.createText(humidityContent('62'));
+  const todayText = await miro.board.createText(todayContent('Saturday'));
+
+  const items = [shape, cityText, degreeText, logo, statusText, windText, humidityText];
+
+  const group = await miro.board.group({ items });
+  const frame = await miro.board.createFrame();
+
   await frame.add(group);
   await miro.board.viewport.zoomTo(card);
 };

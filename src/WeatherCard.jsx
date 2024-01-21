@@ -107,7 +107,7 @@ const windContent = (text) => {
 
 const todayContent = (text) => {
   return {
-    content: captialize(text),
+    content: capitalize(text),
     style: {
       ...styleProperties()
     }, ...locationProperties(0, 0, 300)
@@ -125,7 +125,7 @@ export const createWeatherCard = async (weather) => {
   const windText =  await miro.board.createText(windContent(weatherData.wind.speed));
   const humidityText = await miro.board.createText(humidityContent(weatherData.main.humidity));
   const todayText = await miro.board.createText(todayContent(dayOfWeek));
-  const logo = await miro.board.createImage(logoContent(weatherData.weather.icon));
+  const logo = await miro.board.createImage(logoContent(weatherData.weather[0].icon));
 
   const items = [shape, cityText, degreeText, logo, statusText, windText, humidityText, todayText];
 

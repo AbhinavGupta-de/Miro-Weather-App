@@ -61,13 +61,13 @@ const cityTextContent = (text, x, y) => {
   };
 };
 
-const logoContent = (text) => {
+const logoContent = (text, x, y) => {
   return {
     title: "Logo",
     url: `https://openweathermap.org/img/wn/${text}@2x.png`,
-    x: 0,
-    y: 0,
-    width: 200,
+    x: x,
+    y: y,
+    width: 100,
     rotation: 0.0,
   };
 };
@@ -76,9 +76,9 @@ const degreeContent = (text, x, y) => {
   return {
     content: text,
     style: {},
-    x: x, // Default value: horizontal center of the board
-    y: y, // Default value: vertical center of the board
-    width: text.length * 7,
+    x: x,
+    y: y,
+    width: text.length * 7.25,
     rotation: 0.0,
   };
 };
@@ -89,17 +89,17 @@ const statusContent = (text, x, y) => {
     style: {
       ...styleProperties(),
     },
-    ...locationProperties(x, y, text.length*6.75),
+    ...locationProperties(x, y, text.length*7.25+10),
   };
 };
 
 const humidityContent = (text, x, y) => {
   return {
-    content: `Humidity: ${text}%`,
+    content: text,
     style: {
       ...styleProperties(),
     },
-    ...locationProperties(x, y, text.length*6.75),
+    ...locationProperties(x, y, text.length * 7.25 + 4),
   };
 };
 
@@ -109,7 +109,7 @@ const windContent = (text, x, y) => {
     style: {
       ...styleProperties(),
     },
-    ...locationProperties(x, y, text.length*6.75),
+    ...locationProperties(x, y, text.length * 7.25 + 4),
   };
 };
 
@@ -139,69 +139,86 @@ export const createWeatherCard = async (
     isShowStatus,
   ];
   // trueCount will show how many lines you need to makes, scale the height with this
-  const trueCount = booleanToggles.filter((v) => v).length;
+  let trueCount = booleanToggles.filter((v) => v).length;
+  if (isShowCity && isShowDay) trueCount--;
 
   if (!weatherData || !city) return;
   else {
     // Additional features
     let cityString = "";
-    const degreeString = `${isCelsius ? Math.floor(weatherData.main.temp - 273.15) + '°C' : Math.floor((weatherData.main.temp - 273.15)*9/5 + 32) + '°F'}`
+    const degreeString = `${
+      isCelsius
+        ? Math.floor(weatherData.main.temp - 273.15) + "°C"
+        : Math.floor(((weatherData.main.temp - 273.15) * 9) / 5 + 32) + "°F"
+    }`;
     let lineCount = 1;
     const afterAsync = () => {
       lineCount++;
-      console.log(degreeString, -degreeString*3.25 + 5, -h / 2 + 20 * lineCount );
-    }
+      console.log(
+        degreeString,
+        -degreeString * 3.25 + 5,
+        -h / 2 + 20 * lineCount
+      );
+    };
 
-    const calcH = (lineCount) => -h/2 + 20*lineCount;
+    const calcH = (lineCount) => -h / 2 + 20 * lineCount;
 
     if (isShowCity) cityString += "City: " + weatherData.name + ". ";
     if (isShowDay) cityString += capitalize(dayOfWeek) + ", " + dateForToday;
 
-    const w = cityString.length*7+15;
-    const h = 200;
-    const longestWidth = cityString.length*6.75;
+    const w = cityString.length * 7.25 + 10;
+    let h = 0;
+    if (isShowIcon) {h += 100; trueCount--};
+    h += trueCount*18 + 10;
+    // const longestWidth = cityString.length * 7.25;
 
     // Create border box covering Weather Report
     const shape = await miro.board.createShape(shapeProperties(w, h, 0, 0));
     items.push(shape);
 
     if (cityString) {
-      const cityText = await miro.board.createText(
-        cityTextContent(cityString, 0, calcH(lineCount))
-      ).then(afterAsync)
+      const cityText = await miro.board
+        .createText(cityTextContent(cityString, 0, calcH(lineCount)))
+        .then(afterAsync);
       items.push(cityText);
     }
 
     if (isShowDegree) {
-      const degreeText = await miro.board.createText(
-        degreeContent(degreeString, 0, calcH(lineCount))
-      ).then(afterAsync);
+      const degreeText = await miro.board
+        .createText(degreeContent(degreeString, 0, calcH(lineCount)))
+        .then(afterAsync);
       items.push(degreeText);
     }
 
     if (isShowStatus) {
-      const statusText = await miro.board.createText(
-        statusContent(weatherData.weather[0].description, 0, calcH(lineCount))
-      ).then(afterAsync);
+      const statusText = await miro.board
+        .createText(
+          statusContent(weatherData.weather[0].description, 0, calcH(lineCount))
+        )
+        .then(afterAsync);
       items.push(statusText);
     }
 
     if (isShowWind) {
       const windText = await miro.board.createText(
         windContent(`Wind: ${weatherData.wind.speed}m/s`, 0, calcH(lineCount))
-      );
+      ).then(afterAsync);
       items.push(windText);
     }
     if (isShowHumidity) {
       const humidityText = await miro.board.createText(
-        humidityContent(weatherData.main.humidity, 0, calcH(lineCount))
-      );
+        humidityContent(
+          `Humidity: ${weatherData.main.humidity}%`,
+          0,
+          calcH(lineCount)
+        )
+      ).then(afterAsync);
       items.push(humidityText);
     }
 
     if (isShowIcon) {
       const logo = await miro.board.createImage(
-        logoContent(weatherData.weather[0].icon)
+        logoContent(weatherData.weather[0].icon, 0, calcH(lineCount) + 30)
       );
       items.push(logo);
     }

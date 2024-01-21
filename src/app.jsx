@@ -4,6 +4,7 @@ import { useFormik } from "formik";
 
 import "../src/assets/style.css";
 import { capitalize, createWeatherCard } from "./WeatherCard";
+import { weatherData as mockData } from "./ApiResultExample";
 
 const ShowOptionRadio = ({ formik, option }) => (
   <>
@@ -62,6 +63,7 @@ const App = () => {
         await createWeatherCard(
           weatherData,
           city,
+          values.isCelsius,
           values.isShowCity,
           values.isShowIcon,
           values.isShowDegree,
@@ -75,9 +77,6 @@ const App = () => {
       }
     },
   });
-
-  // make the weather report card
-  const handleChange = () => {};
 
   async function fetchWeather(city) {
     console.log("city", city);
@@ -147,6 +146,8 @@ const App = () => {
         <ShowOptionRadio formik={formik} option="Status" />
 
       </form>
+
+      <button onClick={() => {createWeatherCard(mockData, 'London', true, true, true, true, true ,true ,true, true)}}>Make temporary</button>
     </div>
   );
 };

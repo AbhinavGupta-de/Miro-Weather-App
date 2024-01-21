@@ -23,13 +23,20 @@ const styleProperties = () => {
   };
 };
 
-const shapeProperties = () => {
+const shapeProperties = (w, h, x, y) => {
   return {
-    color: '#FDFDFF', // Default text color: '#1a1a1a' (black)
-    fillColor: '#FFFFFF', // Default shape fill color: transparent (no fill)
-    fillOpacity: 0.0, // Default fill color opacity: no opacity
-  }
-}
+    shape: "rectangle",
+    style: {
+      color: "#FDFDFF", // Default text color: '#1a1a1a' (black)
+      fillColor: "#FFFFFF", // Default shape fill color: transparent (no fill)
+      fillOpacity: 1.0, // Default fill color opacity: no opacity
+    },
+    x: x, // Default value: center of the board
+    y: y, // Default value: center of the board
+    width: w, //Should be changed depending on amount of text
+    height: h,
+  };
+};
 
 export function capitalize(str) {
   // Check if the string is not empty
@@ -41,15 +48,16 @@ export function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-const cityTextContent = (text) => {
+const cityTextContent = (text, x, y) => {
   return {
-    content: `City: ${text}`,
+    content: text,
     style: {
+      fontSize: 14,
       color: "#1a1a1a",
     },
-    x: 0,
-    y: 0,
-    width: 300,
+    x: x,
+    y: y,
+    width: text.length * 6.75,
   };
 };
 
@@ -64,79 +72,51 @@ const logoContent = (text) => {
   };
 };
 
-const degreeContent = (text, isCelsius) => {
-  let degree = text;
-  let unit;
-
-  if (isCelsius) unit = "°C";
-  else {
-    degree = (9 / 5) * degree + 32;
-    unit = "°F";
-  }
-
+const degreeContent = (text, x, y) => {
   return {
-    content: `${text}${unit}`,
+    content: text,
     style: {},
-    x: 0, // Default value: horizontal center of the board
-    y: 0, // Default value: vertical center of the board
-    width: 300,
+    x: x, // Default value: horizontal center of the board
+    y: y, // Default value: vertical center of the board
+    width: text.length * 7,
     rotation: 0.0,
   };
 };
 
-const statusContent = (text) => {
+const statusContent = (text, x, y) => {
   return {
     content: capitalize(text),
     style: {
       ...styleProperties(),
     },
-    ...locationProperties(0, 0, 300),
+    ...locationProperties(x, y, text.length*6.75),
   };
 };
 
-const humidityContent = (text) => {
+const humidityContent = (text, x, y) => {
   return {
     content: `Humidity: ${text}%`,
     style: {
       ...styleProperties(),
     },
-    ...locationProperties(0, 0, 300),
+    ...locationProperties(x, y, text.length*6.75),
   };
 };
 
-const windContent = (text) => {
+const windContent = (text, x, y) => {
   return {
-    content: `Wind: ${text}m/s`,
+    content: text,
     style: {
       ...styleProperties(),
     },
-    ...locationProperties(0, 0, 300),
-  };
-};
-
-const todayContent = (text) => {
-  return {
-    content: capitalize(text),
-    style: {
-      ...styleProperties(),
-    },
-    ...locationProperties(0, 0, 300),
-  };
-};
-
-const dateContent = (text) => {
-  return {
-    content: capitalize(text),
-    style: {
-      ...styleProperties(),
-    },
-    ...locationProperties(0, 0, 300),
+    ...locationProperties(x, y, text.length*6.75),
   };
 };
 
 export const createWeatherCard = async (
   weatherData,
   city,
+  isCelsius,
   isShowCity,
   isShowIcon,
   isShowDegree,
@@ -145,34 +125,78 @@ export const createWeatherCard = async (
   isShowDay,
   isShowStatus
 ) => {
-  console.log("data", weatherData);
-  console.log(
-    "imported",
-    weatherData,
-    city,
+  console.log("data", weatherData, dateForToday, dayOfWeek);
+
+  let items = [];
+
+  const booleanToggles = [
     isShowCity,
     isShowIcon,
     isShowDegree,
     isShowHumidity,
     isShowWind,
     isShowDay,
-    isShowStatus
-  );
-
-  let items = [];
+    isShowStatus,
+  ];
+  // trueCount will show how many lines you need to makes, scale the height with this
+  const trueCount = booleanToggles.filter((v) => v).length;
 
   if (!weatherData || !city) return;
   else {
+    // Additional features
+    let cityString = "";
+    const degreeString = `${isCelsius ? Math.floor(weatherData.main.temp - 273.15) + '°C' : Math.floor((weatherData.main.temp - 273.15)*9/5 + 32) + '°F'}`
+    let lineCount = 1;
+    const afterAsync = () => {
+      lineCount++;
+      console.log(degreeString, -degreeString*3.25 + 5, -h / 2 + 20 * lineCount );
+    }
+
+    const calcH = (lineCount) => -h/2 + 20*lineCount;
+
+    if (isShowCity) cityString += "City: " + weatherData.name + ". ";
+    if (isShowDay) cityString += capitalize(dayOfWeek) + ", " + dateForToday;
+
+    const w = cityString.length*7+15;
+    const h = 200;
+    const longestWidth = cityString.length*6.75;
+
     // Create border box covering Weather Report
-    const shape = await miro.board.createShape(shapeProperties);
+    const shape = await miro.board.createShape(shapeProperties(w, h, 0, 0));
     items.push(shape);
 
-    // Additional features
-    if (isShowCity) {
+    if (cityString) {
       const cityText = await miro.board.createText(
-        cityTextContent(weatherData.name)
-      );
+        cityTextContent(cityString, 0, calcH(lineCount))
+      ).then(afterAsync)
       items.push(cityText);
+    }
+
+    if (isShowDegree) {
+      const degreeText = await miro.board.createText(
+        degreeContent(degreeString, 0, calcH(lineCount))
+      ).then(afterAsync);
+      items.push(degreeText);
+    }
+
+    if (isShowStatus) {
+      const statusText = await miro.board.createText(
+        statusContent(weatherData.weather[0].description, 0, calcH(lineCount))
+      ).then(afterAsync);
+      items.push(statusText);
+    }
+
+    if (isShowWind) {
+      const windText = await miro.board.createText(
+        windContent(`Wind: ${weatherData.wind.speed}m/s`, 0, calcH(lineCount))
+      );
+      items.push(windText);
+    }
+    if (isShowHumidity) {
+      const humidityText = await miro.board.createText(
+        humidityContent(weatherData.main.humidity, 0, calcH(lineCount))
+      );
+      items.push(humidityText);
     }
 
     if (isShowIcon) {
@@ -181,43 +205,12 @@ export const createWeatherCard = async (
       );
       items.push(logo);
     }
-    if (isShowDegree) {
-      const degreeText = await miro.board.createText(
-        degreeContent(Math.floor(weatherData.main.temp - 273.15), true)
-      );
-      items.push(degreeText);
-    }
-    if (isShowStatus) {
-      const statusText = await miro.board.createText(
-        statusContent(weatherData.weather[0].description)
-      );
-      items.push(statusText);
-    }
-    if (isShowWind) {
-      const windText = await miro.board.createText(
-        windContent(weatherData.wind.speed)
-      );
-      items.push(windText);
-    }
-    if (isShowHumidity) {
-      const humidityText = await miro.board.createText(
-        humidityContent(weatherData.main.humidity)
-      );
-      items.push(humidityText);
-    }
-    if (isShowDay) {
-      console.log(dateForToday, dayOfWeek);
-      const todayText = await miro.board.createText(todayContent(dayOfWeek));
-      const dateText = await miro.board.createText(dateContent(dateForToday));
-      items.push(todayText);
-      items.push(dateText);
-    }
 
     // Grouping them into one
     const group = await miro.board.group({ items });
     const frame = await miro.board.createFrame();
 
     await frame.add(group);
-    await miro.board.viewport.zoomTo(card);
+    await miro.board.viewport.zoomTo(frame);
   }
 };

@@ -1,4 +1,5 @@
 const currentDate = new Date();
 
-const options = { weekDay: 'long'}
-export const dayOfWeek = currentDate.toLocaleDateString('en-US', options);
+const options = { weekday: 'long'}
+export const dayOfWeek = currentDate.toLocaleDateString('fi-FI', options);
+export const dateForToday =  currentDate.toLocaleDateString('fi-FI');

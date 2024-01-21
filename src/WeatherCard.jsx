@@ -23,6 +23,14 @@ const styleProperties = () => {
   };
 };
 
+const shapeProperties = () => {
+  return {
+    color: '#FDFDFF', // Default text color: '#1a1a1a' (black)
+    fillColor: '#FFFFFF', // Default shape fill color: transparent (no fill)
+    fillOpacity: 0.0, // Default fill color opacity: no opacity
+  }
+}
+
 export function capitalize(str) {
   // Check if the string is not empty
   if (str.length === 0) {
@@ -156,7 +164,7 @@ export const createWeatherCard = async (
   if (!weatherData || !city) return;
   else {
     // Create border box covering Weather Report
-    const shape = await miro.board.createShape();
+    const shape = await miro.board.createShape(shapeProperties);
     items.push(shape);
 
     // Additional features
@@ -200,7 +208,7 @@ export const createWeatherCard = async (
     if (isShowDay) {
       console.log(dateForToday, dayOfWeek);
       const todayText = await miro.board.createText(todayContent(dayOfWeek));
-      const dateText = await miro.board.createText(dateContent(currentDate));
+      const dateText = await miro.board.createText(dateContent(dateForToday));
       items.push(todayText);
       items.push(dateText);
     }

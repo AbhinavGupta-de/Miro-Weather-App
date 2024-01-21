@@ -35,27 +35,6 @@ const App = () => {
   // make the weather report card
   const handleChange = () => {};
 
-  //   const handleSubmit = (event) => {
-  //     event.preventDefault();
-  //     fetchWeather(city)
-  //       .then((data) => {
-  //         console.log(data);
-  //         setWeather(data);
-  //         const weatherInfo = document.querySelector(".weather-info");
-  //         weatherInfo.innerHTML = `
-  //       <h2>Weather in ${data.name}</h2>
-  //       <p>Temperature: ${data.main.temp}</p>
-  //       <p>Feels like: ${data.main.feels_like}</p>
-  //       <p>Humidity: ${data.main.humidity}</p>
-  //       <p>Pressure: ${data.main.pressure}</p>
-  //       <p>Wind: ${data.wind.speed}</p>
-  //       `;
-  //       })
-  //       .catch((err) => {
-  //         console.log(err);
-  //       });
-  //   };
-
   async function fetchWeather(city) {
     console.log("city", city);
     const response = await fetch(
@@ -67,9 +46,11 @@ const App = () => {
   }
 
   async function addShape() {
-	try {
-		await createWeatherCard('random');
-	} catch(e) { console.error(e) }
+    try {
+      await createWeatherCard("random");
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   return (
@@ -86,14 +67,14 @@ const App = () => {
           type="text"
           placeholder="Enter your city names"
           name="city"
-		  onChange={formik.handleChange}
-		  value={formik.values.city}
+          onChange={formik.handleChange}
+          value={formik.values.city}
         />
 
         <button type="submit">Submit</button>
       </form>
 
-	  <button onClick={() => addShape()}>Press to create item</button>
+      <button onClick={() => addShape()}>Press to create item</button>
     </div>
   );
 };

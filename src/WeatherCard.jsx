@@ -114,17 +114,20 @@ const todayContent = (text) => {
   }
 }
 
-export const createWeatherCard = async (text) => {
+export const createWeatherCard = async (weather) => {
+  console.log('data', weatherData);
+  console.log('icon', weatherData.weather[0].icon);
+
   const shape = await miro.board.createShape();
   const cityText = await miro.board.createText(cityTextContent('London'));
-  const logo = await miro.board.createImage(logoContent(weatherData.weather.icon));
   const degreeText = await miro.board.createText(degreeContent(Math.floor(weatherData.main.temp - 273.15), true));
-  const statusText = await miro.board.createText(statusContent(weatherData.weather.description));
+  const statusText = await miro.board.createText(statusContent(weatherData.weather[0].description));
   const windText =  await miro.board.createText(windContent(weatherData.wind.speed));
   const humidityText = await miro.board.createText(humidityContent(weatherData.main.humidity));
   const todayText = await miro.board.createText(todayContent(dayOfWeek));
+  const logo = await miro.board.createImage(logoContent(weatherData.weather.icon));
 
-  const items = [shape, cityText, degreeText, logo, statusText, windText, humidityText];
+  const items = [shape, cityText, degreeText, logo, statusText, windText, humidityText, todayText];
 
   const group = await miro.board.group({ items });
   const frame = await miro.board.createFrame();

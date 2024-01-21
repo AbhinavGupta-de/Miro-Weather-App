@@ -66,6 +66,12 @@ const App = () => {
     return weather;
   }
 
+  async function addShape() {
+	try {
+		await createWeatherCard('random');
+	} catch(e) { console.error(e) }
+  }
+
   return (
     <div className="grid wrapper">
       <div className="cs1 ce12">
@@ -86,6 +92,8 @@ const App = () => {
 
         <button type="submit">Submit</button>
       </form>
+
+	  <button onClick={() => addShape()}>Press to create item</button>
     </div>
   );
 };
